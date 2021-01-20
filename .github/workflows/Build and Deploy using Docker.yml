@@ -19,6 +19,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - name: Install heroku tool chain
+      run: curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       working-directory: maven_project_with_dockerfile
@@ -31,13 +33,21 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Login to Heroku
-      uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
+    - name: Login to DockerHub
+      uses: docker/login-action@v1 
       with:
-        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-        heroku_app_name: vertxdemo23170
-        heroku_email: ${{secrets.HEROKU_EMAIL}}
-        justlogin: true
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to Heroku registry
+      uses: docker/login-action@v1 
+      with:
+        registry: registry.heroku.com  
+        username: ${{ secrets.HEROKU_EMAIL  }}
+        password: ${{ secrets.HEROKU_API_KEY }}
+    - name: Login to Heroku Container
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku container:login 
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
@@ -47,3 +57,7 @@ jobs:
         tags: |
           himanshumps/vertx_demo:latest
           registry.heroku.com/vertxdemo23170/web
+    - name: Heroku release the pushed image
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku container:release web -a vertxdemo23170
