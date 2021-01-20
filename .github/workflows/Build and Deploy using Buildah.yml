@@ -39,7 +39,7 @@ jobs:
     - name: Buildah tag image
       run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
-      run: buildah push registry.hub.docker.com/himanshumps/vertx_demo && buildah push registry.heroku.com/vertxdemo23170/web
+      run: buildah push registry.hub.docker.com/himanshumps/vertx_demo && buildah push --format v2s2 registry.heroku.com/vertxdemo23170/web
     - name: Heroku release the pushed image
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
