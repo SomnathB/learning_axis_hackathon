@@ -20,7 +20,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Install heroku tool chain
-      run: curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+      run: sudo snap install --classic heroku
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       working-directory: maven_project_with_dockerfile
