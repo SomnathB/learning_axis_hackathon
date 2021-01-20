@@ -34,12 +34,8 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: heroku container:login 
     - name: Build Image
-      uses: redhat-actions/buildah-build@v1
-      with:
-        image: vertx_demo
-        context: maven_project_with_dockerfile
-        dockerfiles: |
-          ./Dockerfile
+      working-directory: maven_project_with_dockerfile
+      run: buildah bud -t vertx_demo .
     - name: Buildah tag image
       run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
