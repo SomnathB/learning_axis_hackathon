@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
     - name: Install heroku tool chain
-      run: npm install -g heroku
+      run: sudo npm install -g heroku
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
