@@ -1,0 +1,50 @@
+# This is a basic workflow that is manually triggered
+
+name: Build and Deploy using Buildah
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+    - name: Install heroku tool chain
+      run: sudo npm install -g heroku
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+      working-directory: maven_project_with_dockerfile
+    - name: Login to DockerHub using Buildah
+      run: buildah login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }} registry.hub.docker.com 
+    - name: Login to Heroku registry using Buildah
+      run: buildah login -u ${{ secrets.HEROKU_EMAIL  }} -p ${{ secrets.HEROKU_API_KEY }} registry.hub.docker.com 
+    - name: Login to Heroku Container
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku container:login 
+    - name: Build Image
+      uses: redhat-actions/buildah-build@v1
+      with:
+        image: vertx_demo
+        context: maven_project_with_dockerfile
+        dockerfiles: |
+          ./Dockerfile
+    - name: Buildah tag image
+    - run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
+    - name: Buildah push image
+      run: buildah push registry.hub.docker.com/himanshumps/vertx_demo && buildah push registry.heroku.com/vertxdemo23170/web
+    - name: Heroku release the pushed image
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku container:release web -a vertxdemo23170
