@@ -31,12 +31,20 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Login to Heroku
+      uses: akhileshns/heroku-deploy@v3.8.9 # This is the action
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: vertxdemo23170
+        heroku_email: ${{secrets.HEROKU_EMAIL}}
+        justlogin: true
     - name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
       with:
         context: maven_project_with_dockerfile
         push: true
-        tags: himanshumps/vertx_demo:latest
-    - name: Image digest
-      run: echo ${{ steps.docker_build.outputs.digest }}
+        tags: |
+          himanshumps/vertx_demo:latest
+          registry.heroku.com/vertxdemo23170/web
+    - name: Release image in Heroku for deployment
