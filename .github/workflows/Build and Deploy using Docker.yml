@@ -47,4 +47,3 @@ jobs:
         tags: |
           himanshumps/vertx_demo:latest
           registry.heroku.com/vertxdemo23170/web
-    - name: Release image in Heroku for deployment
