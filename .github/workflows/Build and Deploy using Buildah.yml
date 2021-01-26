@@ -37,7 +37,7 @@ jobs:
       working-directory: maven_project_with_dockerfile
       run: buildah bud -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
     - name: skopeo
-      run: skopeo copy vertx_demo:latest oci-archive:vertx_demo.tar
+      run: skopeo copy containers-storage:vertx_demo:latest oci-archive:vertx_demo.tar
     - name: Scan image
       uses: sysdiglabs/scan-action@v3
       with:
