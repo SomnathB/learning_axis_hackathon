@@ -41,6 +41,7 @@ jobs:
     - name: Scan image
       uses: sysdiglabs/scan-action@v3
       with:
+        image-tag: "vertx_demo:latest" 
         sysdig-secure-token: ${{ secrets.SYSDIG_TOKEN }}
         sysdig-secure-url: https://us2.app.sysdig.com
         input-type: oci-archive
