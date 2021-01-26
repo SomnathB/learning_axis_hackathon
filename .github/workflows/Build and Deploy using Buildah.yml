@@ -37,7 +37,7 @@ jobs:
       run: heroku container:login 
     - name: Build Image
       working-directory: maven_project_with_dockerfile
-      run: buildah bud --loglevel debug -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
+      run: buildah bud --log-level debug -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
     #- name: skopeo
     #  run: podman save --format oci-archive -o vertx_demo.tar vertx_demo:latest 
     #- name: Scan image
