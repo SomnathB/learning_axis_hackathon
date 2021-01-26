@@ -47,7 +47,7 @@ jobs:
     #    input-type: oci-archive
     #    input-path: vertx_demo.tar
     - name: Scan image
-      run: podman run -u root --privileged -v $HOME/.local/share/containers/storage/:/var/lib/containers quay.io/sysdig/secure-inline-scan:2.2.0 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls vertx_demo
+      run: podman run --network host -v $HOME/.local/share/containers/storage/:/var/lib/containers quay.io/sysdig/secure-inline-scan:2.2.0 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls vertx_demo
     #- name: Buildah tag image
     #  run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
