@@ -29,6 +29,8 @@ jobs:
       working-directory: maven_project_with_dockerfile
     - name: Login to DockerHub using Buildah
       run: buildah login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }} registry.hub.docker.com 
+    - name: Login to quay.io using Buildah
+      run: buildah login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io 
     - name: Login to Heroku registry using Buildah
       run: buildah login -u ${{ secrets.HEROKU_EMAIL  }} -p ${{ secrets.HEROKU_API_KEY }} registry.heroku.com 
     - name: Login to Heroku Container
@@ -37,7 +39,7 @@ jobs:
       run: heroku container:login 
     - name: Build Image
       working-directory: maven_project_with_dockerfile
-      run: buildah bud --log-level debug -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
+      run: buildah bud --log-level debug -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest -t quay.io/himanshumps/vertx_demo .
     #- name: skopeo
     #  run: podman save --format oci-archive -o vertx_demo.tar vertx_demo:latest 
     #- name: Scan image
@@ -48,12 +50,12 @@ jobs:
     #    sysdig-secure-url: https://us2.app.sysdig.com
     #    input-type: oci-archive
     #    input-path: vertx_demo.tar
-    - name: Scan image
-      run: podman run --log-level debug --rm --network host quay.io/sysdig/secure-inline-scan:2.2.0 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls localhost/vertx_demo:latest
+    #- name: Scan image
+    #  run: podman run --log-level debug --rm --network host quay.io/sysdig/secure-inline-scan:2.2.0 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls localhost/vertx_demo:latest
     #- name: Buildah tag image
     #  run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
-      run: buildah push registry.hub.docker.com/himanshumps/vertx_demo && buildah push --format v2s2 registry.heroku.com/vertxdemo23170/web
+      run: buildah push registry.hub.docker.com/himanshumps/vertx_demo && buildah push quay.io/himanshumps/vertx_demo && buildah push --format v2s2 registry.heroku.com/vertxdemo23170/web
     - name: Heroku release the pushed image
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
