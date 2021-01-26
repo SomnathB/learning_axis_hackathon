@@ -37,7 +37,7 @@ jobs:
       run: heroku container:login 
     - name: Build Image
       working-directory: maven_project_with_dockerfile
-      run: buildah bud --loglevel 3 -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
+      run: buildah bud --loglevel debug -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
     #- name: skopeo
     #  run: podman save --format oci-archive -o vertx_demo.tar vertx_demo:latest 
     #- name: Scan image
@@ -49,7 +49,7 @@ jobs:
     #    input-type: oci-archive
     #    input-path: vertx_demo.tar
     - name: Scan image
-      run: podman run --log-level debug --rm --privileged --network host quay.io/sysdig/secure-inline-scan:2.2.0 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls localhost/vertx_demo:latest
+      run: podman run --log-level debug --rm --network host quay.io/sysdig/secure-inline-scan:2.2.0 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls localhost/vertx_demo:latest
     #- name: Buildah tag image
     #  run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
