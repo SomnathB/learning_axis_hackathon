@@ -35,7 +35,7 @@ jobs:
       run: heroku container:login 
     - name: Build Image
       working-directory: maven_project_with_dockerfile
-      run: buildah bud -t vertx_demo -t registry.hub.docker.com/himanshumps/vertx_demo -t registry.heroku.com/vertxdemo23170/web.
+      run: buildah bud -t vertx_demo -t registry.hub.docker.com/himanshumps/vertx_demo -t registry.heroku.com/vertxdemo23170/web .
     - name: skopeo
       run: skepeo copy vertx_demo oci-archive:vertx_demo.tar
     - name: Scan image
