@@ -36,6 +36,11 @@ jobs:
     - name: Build Image
       working-directory: maven_project_with_dockerfile
       run: buildah bud -t vertx_demo .
+    - name: Scan image
+      uses: sysdiglabs/scan-action@v3
+      with:
+        image-tag: "vertx_demo:latest"
+        sysdig-secure-token: "79a4fef2-b665-414b-8c27-7d728765e762"
     - name: Buildah tag image
       run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
