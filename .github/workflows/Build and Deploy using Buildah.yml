@@ -40,7 +40,7 @@ jobs:
       uses: sysdiglabs/scan-action@v3
       with:
         image-tag: "vertx_demo:latest"
-        sysdig-secure-token: 79a4fef2-b665-414b-8c27-7d728765e762
+        sysdig-secure-token: ${{ secrets.SYSDIG_TOKEN }}
         sysdig-secure-url: https://us2.app.sysdig.com
     - name: Buildah tag image
       run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
