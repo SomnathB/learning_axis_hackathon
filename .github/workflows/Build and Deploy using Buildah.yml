@@ -36,18 +36,18 @@ jobs:
     - name: Build Image
       working-directory: maven_project_with_dockerfile
       run: buildah bud -t vertx_demo:latest -t registry.hub.docker.com/himanshumps/vertx_demo:latest -t registry.heroku.com/vertxdemo23170/web:latest .
-    - name: skopeo
-      run: podman save --format oci-archive -o vertx_demo.tar vertx_demo:latest 
-    - name: Scan image
-      uses: sysdiglabs/scan-action@v3
-      with:
-        image-tag: "vertx_demo:latest" 
-        sysdig-secure-token: ${{ secrets.SYSDIG_TOKEN }}
-        sysdig-secure-url: https://us2.app.sysdig.com
-        input-type: oci-archive
-        input-path: vertx_demo.tar
+    #- name: skopeo
+    #  run: podman save --format oci-archive -o vertx_demo.tar vertx_demo:latest 
     #- name: Scan image
-    #  run: podman run -v /var/lib/containers/:/var/lib/containers quay.io/sysdig/secure-inline-scan:2 --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls vertx_demo:latest
+    #  uses: sysdiglabs/scan-action@v3
+    #  with:
+    #    image-tag: "vertx_demo:latest" 
+    #    sysdig-secure-token: ${{ secrets.SYSDIG_TOKEN }}
+    #    sysdig-secure-url: https://us2.app.sysdig.com
+    #    input-type: oci-archive
+    #    input-path: vertx_demo.tar
+    - name: Scan image
+      run: podman run -u root --privileged -v $HOME/.local/share/containers/storage/:/var/lib/containers quay.io/sysdig/secure-inline-scan:latest --storage-type cri-o --sysdig-token ${{ secrets.SYSDIG_TOKEN }} --sysdig-url https://us2.app.sysdig.com --sysdig-skip-tls vertx_demo
     #- name: Buildah tag image
     #  run: buildah tag vertx_demo registry.hub.docker.com/himanshumps/vertx_demo registry.heroku.com/vertxdemo23170/web
     - name: Buildah push image
