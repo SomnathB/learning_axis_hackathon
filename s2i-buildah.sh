@@ -7,10 +7,10 @@ buildah images
 echo "=================== Pushing the image to quay registry ==================="
 buildah push quay.io/himanshumps/vertx_demo:latest
 echo "=================== Logging in openshift ==================="
-oc login --insecure-skip-tls-verify=false --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443
+oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443
 echo "=================== Updating the imagestream for automated deployment ==================="
 oc import-image vertx-demo1 -n hackathon
 echo "=================== Image updated in openshift ==================="
 echo "=================== Update the deployed image on okteto ==================="
-kubectl --kubeconfig=./okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
 echo "=================== Deployment completed in okteto ==================="
