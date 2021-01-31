@@ -12,5 +12,5 @@ echo "=================== Updating the imagestream for automated deployment ====
 oc import-image vertx-demo1 -n hackathon
 echo "=================== Image updated in openshift ==================="
 echo "=================== Update the deployed image on okteto ==================="
-$HOME/kubectl --kubeconfig=./okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+kubectl --kubeconfig=./okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
 echo "=================== Deployment completed in okteto ==================="
