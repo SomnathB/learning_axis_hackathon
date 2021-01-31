@@ -1,4 +1,8 @@
 #!/bin/bash
+echo "$PWD/kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps --v=4 set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest"
+ls -altr $PWD
+$PWD/kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+
 echo "=================== Generating s2i for buildah ==================="
 s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
 echo "=================== Running s2i with buildah ==================="
