@@ -1,9 +1,15 @@
 #!/bin/bash
 echo "kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps --v=4 set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest"
 ls -altr $PWD
+echo "1"
 kubectl version --client
+echo "2"
+kubectl --kubeconfig=$PWD/okteto-kube.config config current-context
+echo "3"
+kubectl --kubeconfig=$PWD/okteto-kube.config config view
+echo "4"
 kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
-
+echo "5"
 echo "=================== Generating s2i for buildah ==================="
 s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
 echo "=================== Running s2i with buildah ==================="
@@ -18,7 +24,7 @@ echo "=================== Updating the imagestream for automated deployment ====
 #oc import-image vertx-demo1 -n hackathon
 echo "=================== Image updated in openshift ==================="
 echo "=================== Update the deployed image on okteto ==================="
-echo "$PWD/kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps --v=4 set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest"
+echo "kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps --v=4 set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest"
 ls $PWD
-$PWD/kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
 echo "=================== Deployment completed in okteto ==================="
