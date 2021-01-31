@@ -20,4 +20,4 @@ jobs:
       with:
         version: '4.6'
     - name: Run the shell script
-      run: s2i-buildah.sh
+      run: ls -altr && ./s2i-buildah.sh
