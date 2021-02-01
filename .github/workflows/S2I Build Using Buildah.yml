@@ -20,7 +20,7 @@ jobs:
     - name: Login to quay.io using Buildah
       run: buildah login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io
     - name: Generating s2i for buildah
-      run: s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
+      run: s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi8_java vertx_demo
     - name: Running s2i with buildah
       run: buildah bud -v $PWD/maven/:/tmp/maven/settings/ -t quay.io/himanshumps/vertx_demo .
     - name: Pushing the image to quay registry
