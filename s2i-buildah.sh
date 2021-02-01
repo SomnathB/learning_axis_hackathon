@@ -1,6 +1,7 @@
 #!/bin/bash
 echo "kubectl --namespace=himanshumps --v=4 set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest"
 ls -altr $PWD
+okteto namespace
 echo "1"
 kubectl version --client
 echo "2"
@@ -8,7 +9,7 @@ kubectl config current-context
 echo "3"
 kubectl config view
 echo "4"
-kubectl --kubeconfig=$PWD/okteto-kube.config --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+kubectl --namespace=himanshumps set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
 echo "5"
 echo "=================== Generating s2i for buildah ==================="
 s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
