@@ -41,7 +41,7 @@ jobs:
     - name: Create the Dockerfile
       run: printf "FROM openjdk:8-slim\nARG JAR_FILE=target/*.jar\nRUN mkdir -p /deployments\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chown -R 1001:0 /deployments && chmod -R 0755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [\"java\",\"-jar\",\"/deployments/app.jar\"]" > Dockerfile && cat Dockerfile
     - name: Create image using buildah
-      run: buildah bud --layers debug --build-arg JAR_FILE="vertx-starter/target/app.jar" -t quay.io/himanshumps/vertx_demo .
+      run: buildah bud --layers --build-arg JAR_FILE="vertx-starter/target/app.jar" -t quay.io/himanshumps/vertx_demo .
     - name: Pushing the image to quay registry
       run: buildah push quay.io/himanshumps/vertx_demo:latest
     - name: Deploy to openshift
