@@ -26,5 +26,5 @@ jobs:
     - name: Deploy to openshift
       run: oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
     - name: Deploy to okteto
-      run: okteto namespace && kubectl --namespace=himanshumps image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+      run: okteto namespace && kubectl set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest --namespace himanshumps
        
