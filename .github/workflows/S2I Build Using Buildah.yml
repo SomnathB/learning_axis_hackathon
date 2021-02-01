@@ -13,19 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Upodate packages
-      run: sudo apt --only-upgrade install buildah podman skopeo
     - name: Install oc tool
       run: mkdir /tmp/s2i/ && cd /tmp/s2i/ && curl -s https://api.github.com/repos/openshift/source-to-image/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi - && tar xvf source-to-image*.gz && sudo mv s2i /usr/local/bin && rm -rf /tmp/s2i/
     - name: Install okteto tool
-      #run: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod 777 kubectl && sudo mv kubectl /usr/local/bin && rm -rf kubectl && kubectl version --client && curl https://get.okteto.com -sSfL | sh
       run: curl https://get.okteto.com -sSfL | sh
     - name: Login to quay.io using Buildah
       run: buildah login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io
     - name: Generating s2i for buildah
       run: s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
     - name: Running s2i with buildah
-      run: buildah bud  -v $PWD/maven/:/tmp/maven/settings/:Z --layers -t quay.io/himanshumps/vertx_demo .
+      run: buildah bud -v $PWD/maven/:/tmp/maven/settings/ -t quay.io/himanshumps/vertx_demo .
     - name: Pushing the image to quay registry
       run: buildah push quay.io/himanshumps/vertx_demo:latest
     - name: Deploy to openshift
