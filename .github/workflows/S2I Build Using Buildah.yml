@@ -28,8 +28,8 @@ jobs:
     - name: Change namespace to okteto
       run: okteto namespace 
     - name: K8S deploy to okteto
-      uses: andrioid/gh-action-k8s-set-imagee@1.0.0
+      uses: andrioid/gh-action-k8s-set-image@1.0.0
       with:
         namespace: "himanshumps"
-        images: vertx-demo.vertx-demo=quay.io/himanshumps/vertx_demo:latest
+        images: deployment.vertx-demo.vertx-demo=quay.io/himanshumps/vertx_demo:latest
        
