@@ -12,28 +12,28 @@ on:
         default: 'himanshumps/vertx-starter'
         # Input has to be provided for the workflow to run
         required: true
-    quay_image_name:
+      quay_image_name:
        # Friendly description to be shown in the UI instead of 'name'
         description: 'The quay.io image name'
         # Default value if no value is explicitly provided
         default: 'quay.io/himanshumps/vertx_demo'
         # Input has to be provided for the workflow to run
         required: true
-    openshift_namespace:
+      openshift_namespace:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'The openshift project name'
         # Default value if no value is explicitly provided
         default: 'hackathon'
         # Input has to be provided for the workflow to run
         required: true
-    openshift_deployment_name:
+      openshift_deployment_name:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'The openshift deployment name'
         # Default value if no value is explicitly provided
         default: 'vertx-demo1'
         # Input has to be provided for the workflow to run
         required: true
-    okteto_deployment_name:
+      okteto_deployment_name:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'The okteto deployment name'
         # Default value if no value is explicitly provided
