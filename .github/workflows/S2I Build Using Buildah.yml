@@ -20,8 +20,12 @@ jobs:
       run: curl https://get.okteto.com -sSfL | sh
     - name: Login to quay.io using Buildah
       run: buildah login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io
-    - name: Run the shell script
-      run: ls -altr && ./s2i-buildah.sh
+    - name: Generating s2i for buildah
+      run: s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
+    - name: Running s2i with buildah
+      run: buildah bud  -v $PWD/maven/:/tmp/maven/settings/:Z --layers -t quay.io/himanshumps/vertx_demo .
+    - name: Pushing the image to quay registry
+      run: buildah push quay.io/himanshumps/vertx_demo:latest
     - name: Deploy to openshift
       run: oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
     - name: Login to okteto and change namespace
