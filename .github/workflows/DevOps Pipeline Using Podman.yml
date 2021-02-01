@@ -45,9 +45,9 @@ jobs:
     - name: Pushing the image to quay registry
       run: podman push quay.io/himanshumps/vertx_demo:latest
     - name: Deploy to openshift
-      run: oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
+      run: oc login --insecure-skip-tls-verify --token=${{ secrets.OC_TOKEN }} --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
     - name: Login to okteto and change namespace
-      run: okteto login --token 8NfN5g1bXtkbnY4XNNA2HHfjFoQZMbhIiranHiWm && okteto namespace 
+      run: okteto login --token ${{ secrets.OKTETO_TOKEN }} && okteto namespace 
     - name: K8S deploy to okteto
       uses: actions-hub/kubectl@v1.17.9-fix
       env:
