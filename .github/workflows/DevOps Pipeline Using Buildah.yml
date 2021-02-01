@@ -16,7 +16,7 @@ jobs:
       with:
         repository: himanshumps/vertx-starter
         path: ./vertx-starter  
-    - name: Set up JDK 1.8
+    - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
         java-version: 11
@@ -38,13 +38,11 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - name: Sonar scan
+    - name: Build with maven and sonar scan
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: mvn -f ./vertx-starter/pom.xml -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-    - name: Build with Maven
-      run: pwd && mvn -B clean package -DskipTests -f ./vertx-starter/pom.xml && env_var=$(grep "\[INFO\] Installing .*\.jar to .*\.jar" maven_logs.log | tail -1 | awk '{split($0,a," to "); print $NF}') && echo $env_var && echo "jarfilepath=$env_var" >> $GITHUB_ENV
+      run: pwd && mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar package -f ./vertx-starter/pom.xml && env_var=$(grep "\[INFO\] Installing .*\.jar to .*\.jar" maven_logs.log | tail -1 | awk '{split($0,a," to "); print $NF}') && echo $env_var && echo "jarfilepath=$env_var" >> $GITHUB_ENV
     - name: Print env variable
       run: echo "${{ env.jarfilepath }}"
     - name: Create the Dockerfile
