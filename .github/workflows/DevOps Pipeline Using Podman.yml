@@ -4,7 +4,42 @@ name: DevOps Pipeline Using Podman
 # or API.
 on:
   workflow_dispatch:
-
+    inputs:
+      repository_to_clone:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'The github repository to be cloned'
+        # Default value if no value is explicitly provided
+        default: 'himanshumps/vertx-starter'
+        # Input has to be provided for the workflow to run
+        required: true
+      quay_image_name:
+       # Friendly description to be shown in the UI instead of 'name'
+        description: 'The quay.io image name'
+        # Default value if no value is explicitly provided
+        default: 'quay.io/himanshumps/vertx_demo'
+        # Input has to be provided for the workflow to run
+        required: true
+      openshift_namespace:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'The openshift project name'
+        # Default value if no value is explicitly provided
+        default: 'hackathon'
+        # Input has to be provided for the workflow to run
+        required: true
+      openshift_deployment_name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'The openshift deployment name'
+        # Default value if no value is explicitly provided
+        default: 'vertx-demo1'
+        # Input has to be provided for the workflow to run
+        required: true
+      okteto_deployment_name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'The okteto deployment name'
+        # Default value if no value is explicitly provided
+        default: 'deployment/vertx-demo'
+        # Input has to be provided for the workflow to run
+        required: true
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "greet"
@@ -14,38 +49,43 @@ jobs:
     steps:
     - uses: actions/checkout@master
       with:
-        repository: himanshumps/vertx-starter
+        repository: ${{ github.event.inputs.repository_to_clone }}
         path: ./vertx-starter  
-    - name: Set up JDK 1.8
+    - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: 11
     - name: Install oc tool
       run: mkdir /tmp/s2i/ && cd /tmp/s2i/ && curl -s https://api.github.com/repos/openshift/source-to-image/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi - && tar xvf source-to-image*.gz && sudo mv s2i /usr/local/bin && rm -rf /tmp/s2i/
     - name: Install okteto tool
       run: curl https://get.okteto.com -sSfL | sh
-    - name: Login to quay.io using Buildah
+    - name: Login to quay.io using podman
       run: podman login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io
-    - name: Cache local Maven repository
+    - name: Cache SonarCloud packages
       uses: actions/cache@v2
       with:
-        path: |
-          ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Build with Maven
-      run: pwd && mvn -B clean install -DskipTests -f ./vertx-starter/pom.xml && env_var=$(grep "\[INFO\] Installing .*\.jar to .*\.jar" maven_logs.log | tail -1 | awk '{split($0,a," to "); print $NF}') && echo $env_var && echo "jarfilepath=$env_var" >> $GITHUB_ENV
-    - name: Print env variable
-      run: echo "${{ env.jarfilepath }}"
+        path: ~/.sonar/cache
+        key: ${{ runner.os }}-sonar
+        restore-keys: ${{ runner.os }}-sonar
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Build with maven and sonar scan
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: pwd && mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar package -f ./vertx-starter/pom.xml
     - name: Create the Dockerfile
-      run: printf "FROM openjdk:8-slim\nARG JAR_FILE=target/*.jar\nRUN mkdir -p /deployments\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chown -R 1001:0 /deployments && chmod -R 0755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [\"java\",\"-jar\",\"/deployments/app.jar\"]" > Dockerfile && cat Dockerfile
-    - name: Create image using buildah
-      run: podman build --build-arg JAR_FILE="vertx-starter/target/app.jar" -t quay.io/himanshumps/vertx_demo .
+      run: printf "FROM adoptopenjdk/openjdk8:alpine-jre\nARG JAR_FILE=target/*.jar\nRUN apk --no-cache add curl && mkdir -p /deployments && curl https://repo1.maven.org/maven2/io/fabric8/run-java-sh/1.3.8/run-java-sh-1.3.8-sh.sh -o /deployments/run-java.sh\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chown -R 1001:0 /deployments && chmod -R 0755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [ \"/deployments/run-java.sh\" ]" > Dockerfile && cat Dockerfile
+    - name: Create image using podman
+      run: podman build --build-arg JAR_FILE="vertx-starter/target/app.jar" -t ${{ github.event.inputs.quay_image_name }} .
     - name: Pushing the image to quay registry
-      run: podman push quay.io/himanshumps/vertx_demo:latest
+      run: podman push ${{ github.event.inputs.quay_image_name }}:latest
     - name: Deploy to openshift
-      run: oc login --insecure-skip-tls-verify --token=${{ secrets.OC_TOKEN }} --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
+      run: oc login --insecure-skip-tls-verify --token=${{ secrets.OC_TOKEN }} --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image ${{ github.event.inputs.openshift_deployment_name }} -n ${{ github.event.inputs.openshift_namespace }}
     - name: Login to okteto and change namespace
       run: okteto login --token ${{ secrets.OKTETO_TOKEN }} && okteto namespace 
     - name: K8S deploy to okteto
@@ -53,4 +93,4 @@ jobs:
       env:
         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_DATA }}
       with:
-        args: rollout restart deployment/vertx-demo
+        args: rollout restart ${{ github.event.inputs.okteto_deployment_name }}
