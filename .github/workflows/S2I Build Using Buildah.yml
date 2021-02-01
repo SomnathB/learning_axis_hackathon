@@ -21,10 +21,10 @@ jobs:
       run: buildah login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io
     - name: Generating s2i for buildah
       run: s2i build  --as-dockerfile Dockerfile https://github.com/himanshumps/vertx-starter.git quay.io/himanshumps/ubi_java8 vertx_demo
-    - name: Running s2i with buildah
-      run: buildah bud -v $PWD/maven/:/tmp/maven/settings/ -t quay.io/himanshumps/vertx_demo .
-    - name: Pushing the image to quay registry
-      run: buildah push quay.io/himanshumps/vertx_demo:latest
+    #- name: Running s2i with buildah
+    #  run: buildah bud -v $PWD/maven/:/tmp/maven/settings/ -t quay.io/himanshumps/vertx_demo .
+    #- name: Pushing the image to quay registry
+    #  run: buildah push quay.io/himanshumps/vertx_demo:latest
     - name: Deploy to openshift
       run: oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
     - name: Login to okteto and change namespace
@@ -34,4 +34,4 @@ jobs:
       env:
         KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_DATA }}
       with:
-        args: set image deployment vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+        args: rollout restart deployment/vertx-demo
