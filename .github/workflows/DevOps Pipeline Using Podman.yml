@@ -79,7 +79,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: pwd && mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar package -f ./vertx-starter/pom.xml
     - name: Create the Dockerfile
-      run: printf "FROM adoptopenjdk/openjdk8:alpine-jre\nARG JAR_FILE=target/*.jar\nRUN apk --no-cache add curl && mkdir -p /deployments && curl https://repo1.maven.org/maven2/io/fabric8/run-java-sh/1.3.8/run-java-sh-1.3.8-sh.sh -o /deployments/run-java.sh\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chown -R 1001:0 /deployments && chmod -R 0755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [ \"/deployments/run-java.sh\" ]" > Dockerfile && cat Dockerfile
+      run: printf "FROM adoptopenjdk/openjdk8:alpine-jre\nARG JAR_FILE=target/*.jar\nRUN apk --no-cache add curl && mkdir -p /deployments && curl https://repo1.maven.org/maven2/io/fabric8/run-java-sh/1.3.8/run-java-sh-1.3.8-sh.sh -o /deployments/run-java.sh\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chown -R 1001:0 /deployments && chmod -R 0755 /deployments\nEXPOSE 8080 8443\n USER 1001\nCMD [ \"/deployments/run-java.sh\" ]" > Dockerfile && cat Dockerfile
     - name: Create image using podman
       run: podman build --build-arg JAR_FILE="vertx-starter/target/app.jar" -t ${{ github.event.inputs.quay_image_name }} .
     - name: Pushing the image to quay registry
