@@ -19,7 +19,7 @@ jobs:
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: 11
     - name: Install oc tool
       run: mkdir /tmp/s2i/ && cd /tmp/s2i/ && curl -s https://api.github.com/repos/openshift/source-to-image/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi - && tar xvf source-to-image*.gz && sudo mv s2i /usr/local/bin && rm -rf /tmp/s2i/
     - name: Install okteto tool
