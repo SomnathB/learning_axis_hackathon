@@ -25,6 +25,11 @@ jobs:
     #  run: ls -altr && ./s2i-buildah.sh
     - name: Deploy to openshift
       run: oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
-    - name: Deploy to okteto
-      run: okteto namespace && kubectl set image deployment/vertx-demo vertx-demo=quay.io/himanshumps/vertx_demo:latest
+    - name: Change namespace to okteto
+      run: okteto namespace 
+    - name: K8S deploy to okteto
+      uses: andrioid/gh-action-k8s-set-imagee@1.0.0
+      with:
+        namespace: "himanshumps"
+        images: vertx-demo.vertx-demo=quay.io/himanshumps/vertx_demo:latest
        
