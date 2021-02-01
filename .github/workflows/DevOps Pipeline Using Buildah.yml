@@ -27,7 +27,7 @@ jobs:
     - name: Print env variable
       run: echo "${{ env.jarfilepath }}"
     - name: Create the Dockerfile
-      run: printf "FROM openjdk:8-slim\nARG JAR_FILE=target/*.jar\nRUN mkdir -p /deployments\nCOPY ${JAR_FILE} /deployments/app.jar\nRUN chmod -R 1001:0 /deployments && chmod -R 755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [\"java\",\"-jar\",\"/deployments/app.jar\"]" > Dockerfile && cat Dockerfile
+      run: printf "FROM openjdk:8-slim\nARG JAR_FILE=target/*.jar\nRUN mkdir -p /deployments\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chmod -R 1001:0 /deployments && chmod -R 755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [\"java\",\"-jar\",\"/deployments/app.jar\"]" > Dockerfile && cat Dockerfile
     - name: Create image using buildah
       run: buildah bud --build-arg JAR_FILE="${{ env.jarfilepath }}" -t quay.io/himanshumps/vertx_demo 
     - name: Pushing the image to quay registry
