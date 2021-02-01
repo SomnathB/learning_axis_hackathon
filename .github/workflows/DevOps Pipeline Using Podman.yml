@@ -1,0 +1,56 @@
+name: DevOps Pipeline Using Podman
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+      with:
+        repository: himanshumps/vertx-starter
+        path: ./vertx-starter  
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Install oc tool
+      run: mkdir /tmp/s2i/ && cd /tmp/s2i/ && curl -s https://api.github.com/repos/openshift/source-to-image/releases/latest | grep browser_download_url | grep linux-amd64 | cut -d '"' -f 4 | wget -qi - && tar xvf source-to-image*.gz && sudo mv s2i /usr/local/bin && rm -rf /tmp/s2i/
+    - name: Install okteto tool
+      run: curl https://get.okteto.com -sSfL | sh
+    - name: Login to quay.io using Buildah
+      run: podman login -u ${{ secrets.QUAY_USERNAME }} -p ${{ secrets.QUAY_PASSWORD }} quay.io
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Build with Maven
+      run: pwd && mvn -B clean install -DskipTests -f ./vertx-starter/pom.xml && env_var=$(grep "\[INFO\] Installing .*\.jar to .*\.jar" maven_logs.log | tail -1 | awk '{split($0,a," to "); print $NF}') && echo $env_var && echo "jarfilepath=$env_var" >> $GITHUB_ENV
+    - name: Print env variable
+      run: echo "${{ env.jarfilepath }}"
+    - name: Create the Dockerfile
+      run: printf "FROM openjdk:8-slim\nARG JAR_FILE=target/*.jar\nRUN mkdir -p /deployments\nCOPY \${JAR_FILE} /deployments/app.jar\nRUN chown -R 1001:0 /deployments && chmod -R 0755 /deployments\nEXPOSE 8080 8443\n USER 1001\nENTRYPOINT [\"java\",\"-jar\",\"/deployments/app.jar\"]" > Dockerfile && cat Dockerfile
+    - name: Create image using buildah
+      run: podman build --build-arg JAR_FILE="vertx-starter/target/app.jar" -t quay.io/himanshumps/vertx_demo .
+    - name: Pushing the image to quay registry
+      run: podman push quay.io/himanshumps/vertx_demo:latest
+    - name: Deploy to openshift
+      run: oc login --insecure-skip-tls-verify --token=kUch6fTfQ6C6bFZ2QdhlGt2NMfKpJIgbrFNen2WMIj4 --server=https://api.shared-na4.na4.openshift.opentlc.com:6443 && oc import-image vertx-demo1 -n hackathon
+    - name: Login to okteto and change namespace
+      run: okteto login --token 8NfN5g1bXtkbnY4XNNA2HHfjFoQZMbhIiranHiWm && okteto namespace 
+    - name: K8S deploy to okteto
+      uses: actions-hub/kubectl@v1.17.9-fix
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG_DATA }}
+      with:
+        args: rollout restart deployment/vertx-demo
